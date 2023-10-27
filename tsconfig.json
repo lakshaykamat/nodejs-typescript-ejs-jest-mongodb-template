@@ -1,15 +1,22 @@
 {
-    "compilerOptions":{
-    "module":"NodeNext",
-    "moduleResolution":"NodeNext",
-    "target":"ES2020",
-    "sourceMap":true,
-    "outDir":"dist",
-    "rootDirs": ["src"],
-    "lib": ["es2020"],
-    "esModuleInterop": true,
-    "types": ["node"]
+    "compilerOptions": {
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "target": "ES2020",
+        "sourceMap": true,
+        "outDir": "dist",
+        "rootDirs": [
+            "src"
+        ],
+        "lib": [
+            "es2020"
+        ],
+        "esModuleInterop": true,
+        "types": [
+            "node"
+        ]
     },
-    "include":["src/**/*"],
-    }
-    
+    "include": [
+        "src/**/*"
+    ],
+}

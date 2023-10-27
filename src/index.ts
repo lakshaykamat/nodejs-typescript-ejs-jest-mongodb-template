@@ -1,59 +1,38 @@
 import 'dotenv/config'
-import Express from "express";
-import { ApolloServer } from '@apollo/server';
+import Express , { Request, Response }from "express";
 import database from './db/index.js'
-import exampleRouter from './routes/exampleRoute.js'
-import bodyParser from "body-parser";
-import cors from 'cors'
-import { expressMiddleware } from "@apollo/server/express4";
-//import  resolvers from './graphql/resolvers.js';
-//import typeDefs from './graphql/schema.js';
+import exampleRouter from './routes/index.js'
 const app = Express()
+database()
 const PORT = 8080
 
-const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin',
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster',
-    },
-];
 
-const typeDefs = `
-  type Book {
-    title: String
-    author: String
-  }
+/******* EJS Routes*********/
+app.set('view engine', 'ejs');
+app.set('views', './src/views');
 
-  type Query {
-    books: [Book]
-  }
-`;
-
-
-
-const resolvers = {
-    Query: {
-        books: () => books,
-    },
-};
+app.get('/', async (req: Request, res: Response) => {
+    try {
+      const testApiResponse = await fetch('http://localhost:8080/api/v1/test');
+      if (testApiResponse.ok) {
+        //?Look Here
+        //@ts-ignore
+        const testApiData: { status: string } = await testApiResponse.json();
+        const message = testApiData.status;
+        res.render('index', { message });
+      } else {
+        console.error('Error while calling /api/v1/test:', testApiResponse.statusText);
+        res.status(500).send('Internal Server Error');
+      }
+    } catch (error) {
+      console.error('Error while calling /api/test:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
 
-const start = async () => {
-    database()
-    app.use(bodyParser.json());
-    app.use(cors());
-    const server = new ApolloServer({
-        typeDefs,
-        resolvers
-    });
-    await server.start();
-    app.use("/graphql", expressMiddleware(server));
-    app.listen(PORT, () => console.log(`\nServer is running on Port ${PORT}`));
-};
-start()
+app.use('/api/v1/',exampleRouter)
 
-app.use('/',exampleRouter)
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
