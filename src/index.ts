@@ -1,59 +1,37 @@
-import 'dotenv/config'
-import Express from "express";
-import { ApolloServer } from '@apollo/server';
-import database from './db/index.js'
-import exampleRouter from './routes/exampleRoute.js'
-import bodyParser from "body-parser";
-import cors from 'cors'
-import { expressMiddleware } from "@apollo/server/express4";
-//import  resolvers from './graphql/resolvers.js';
-//import typeDefs from './graphql/schema.js';
-const app = Express()
-const PORT = 8080
+import express from 'express';
+import morgan from 'morgan';
+import routes from './routes/index.js';
+import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
+import path,{ dirname } from "path"
+import dbConnect from "./db/index.js"
+import { fileURLToPath } from 'url';
+dotenv.config();
 
-const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin',
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster',
-    },
-];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const typeDefs = `
-  type Book {
-    title: String
-    author: String
-  }
+// Create an Express application
+const app = express();
+dbConnect()
 
-  type Query {
-    books: [Book]
-  }
-`;
+// Middleware for logging HTTP requests
+app.use(morgan('dev'));
 
 
+// Set view engine and views directory
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-const resolvers = {
-    Query: {
-        books: () => books,
-    },
-};
+// Middleware for parsing JSON and URL-encoded request bodies
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
+// Routes
+app.use("/",routes)
 
-const start = async () => {
-    database()
-    app.use(bodyParser.json());
-    app.use(cors());
-    const server = new ApolloServer({
-        typeDefs,
-        resolvers
-    });
-    await server.start();
-    app.use("/graphql", expressMiddleware(server));
-    app.listen(PORT, () => console.log(`\nServer is running on Port ${PORT}`));
-};
-start()
-
-app.use('/',exampleRouter)
+// Start the server
+const PORT: number = parseInt(process.env.PORT || '3000');
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
