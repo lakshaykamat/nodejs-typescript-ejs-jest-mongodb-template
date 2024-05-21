@@ -27,8 +27,19 @@ app.set('views', path.join(getDirectoryName(__fileName), 'views'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Middleware for redirecting "/" to "/api/v1"
+app.get('/', (req, res) => {
+  res.redirect('/api/v1');
+})
+
 // Routes
-app.use("/",routes)
+app.use("/api/v1",routes)
+
+
+// Middleware for handling "Not Found" routes
+app.use((req, res, next) => {
+  res.status(404).send("Not Found");
+});
 
 // Start the server
 const PORT: number = parseInt(process.env.PORT || '3000');
